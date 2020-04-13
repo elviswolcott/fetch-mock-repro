@@ -22,10 +22,6 @@ jest.mock("node-fetch", () => {
 const fetchMock = require("node-fetch");
 import fetch, { Request, Response } from "node-fetch";
 
-afterEach(() => {
-  fetchMock.reset();
-});
-
 // JSON to Request body
 const jsonBody = (json: object): ArrayBuffer => {
   const content = JSON.stringify(json, null, 2);
@@ -46,14 +42,20 @@ const no = (url: string, options: object, request: Request): Response =>
     }
   );
 
+beforeEach(() => {
+  fetchMock.mock("https://yesno.wtf/api", no);
+});
+
+afterEach(() => {
+  fetchMock.resetBehavior();
+});
+
 describe("YesNo SDK", () => {
   it('answers "yes" or "no"', async () => {
-    fetchMock.mock("https://yesno.wtf/api", no);
     const answer = (await yesno()).answer;
     expect(answer).toMatch(/(yes|no)/);
   });
   it("includes an image", async () => {
-    fetchMock.mock("https://yesno.wtf/api", no);
     const image = (await yesno()).image;
     expect(image).toBeTruthy();
   });
